@@ -16,7 +16,7 @@ public class TestimonialDAO {
         return testimonialRepository.findAll();
     }
 
-    public Optional<Testimonial> findMovieByUid(Integer uid){
+    public Optional<Testimonial> findTestimonialByUid(Integer uid){
         return testimonialRepository.findMovieByUid(uid);
     }
 
