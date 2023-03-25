@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface TestimonialRepository extends MongoRepository<Testimonial, ObjectId> {
-    Optional<Testimonial> findMovieByUid(Integer uid);
+    Optional<Testimonial> findTestimonialByUid(Integer uid);
+    Optional<Testimonial> findThreeRandomTestimonialByApproved(Boolean uid);
 
 }

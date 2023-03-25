@@ -1,9 +1,8 @@
 package com.herokuapp.lifeofal.rest.controller;
 
-import com.herokuapp.lifeofal.rest.model.AbstractObject;
 import com.herokuapp.lifeofal.rest.model.Testimonial;
+import com.herokuapp.lifeofal.rest.model.User;
 import com.herokuapp.lifeofal.rest.service.TestimonialDAO;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/rest/v1/testimonial")
+@CrossOrigin(origins = "*")
 public class TestimonialController {
 
     @Autowired
@@ -27,12 +26,19 @@ public class TestimonialController {
     @Autowired
     private MongoOperations mongoOperations;
 
-    @GetMapping("testimonial")
+    @GetMapping("/all")
     public ResponseEntity<List<Testimonial>> getAllTestimonials() {
         return new ResponseEntity<List<Testimonial>>(testimonialDAO.allTestimonials(), HttpStatus.OK);
     }
 
-    @GetMapping("testimonial/{uid}")
+    @GetMapping("/approved/threeRandom")
+    public ResponseEntity<List<Testimonial>> getThreeRandomTestimonials() throws Exception {
+//        return new ResponseEntity<Optional<Testimonial>>(testimonialDAO.findThreeRandomApproved(true), HttpStatus.OK);
+        List<Testimonial> testimonials = testimonialDAO.findThreeRandomApproved(true);
+        return new ResponseEntity<>(testimonials, HttpStatus.OK);
+    }
+
+    @GetMapping("/{uid}")
     public ResponseEntity<Optional<Testimonial>> getTestimonialById(@PathVariable Integer uid) {
         return new ResponseEntity<Optional<Testimonial>>(testimonialDAO.findTestimonialByUid(uid), HttpStatus.OK);
     }
@@ -46,8 +52,14 @@ public class TestimonialController {
         query.with(Sort.by(Sort.Direction.DESC, "uid")).limit(1);
         Testimonial lastObj = mongoOperations.findOne(query, Testimonial.class);
         int nextUid = (lastObj == null) ? 1 : lastObj.getUid() + 1;
-        objBody.setUid(nextUid);
-        return createOrUpdateTestimonial(objBody, objBody.getUid());
+        User user = new User();
+        user.setName(objBody.getUser().getName());
+//        user.setTitle(title);
+        user.setEmail(objBody.getUser().getEmail());
+        user.setLink(objBody.getUser().getLink());
+        Testimonial testimonialObj = new Testimonial(user, objBody.getText(), false);
+        testimonialObj.setUid(nextUid);
+        return createOrUpdateTestimonial(testimonialObj, testimonialObj.getUid());
     }
 
     @PostMapping("/update/{uid}")
@@ -58,12 +70,12 @@ public class TestimonialController {
         Optional<Testimonial> tempTestimonial = testimonialDAO.findTestimonialByUid(uid);
         if (tempTestimonial.isPresent()) {
             Testimonial existingCustomer = tempTestimonial.get();
-            existingCustomer.setId(objBody.getId());
+//            existingCustomer.setUid(objBody.getUid());
             existingCustomer.setUser(objBody.getUser());
             existingCustomer.setText(objBody.getText());
-            if (objBody.getLinks() != null) {
-                existingCustomer.setLinks(objBody.getLinks());
-            }
+//            if (objBody.getLinks() != null) {
+//                existingCustomer.setLinks(objBody.getLinks());
+//            }
             savedEntity = testimonialDAO.createOrUpdate(existingCustomer);
             foundFlag = true;
         }else {
