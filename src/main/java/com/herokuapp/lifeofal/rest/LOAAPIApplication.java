@@ -10,8 +10,7 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
-@EnableAutoConfiguration()
+@SpringBootApplication(exclude = {MongoAutoConfiguration.class})
 public class LOAAPIApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
