@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.herokuapp.lifeofal</groupId>
-	<artifactId>testimonials</artifactId>
+	<artifactId>loa_rest</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>testimonials</name>
 	<description>An API for submitting testimonials</description>
