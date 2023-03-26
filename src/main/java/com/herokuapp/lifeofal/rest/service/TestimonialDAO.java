@@ -5,6 +5,7 @@ import com.herokuapp.lifeofal.rest.repository.TestimonialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -26,42 +27,28 @@ public class TestimonialDAO {
     }
 
     public List<Testimonial> findThreeRandomApproved(Boolean approved) throws Exception {
-//        return testimonialRepository.findThreeRandomTestimonialByApproved(approved);
-        // Create a query to find all approved testimonials
         Query query = new Query();
-        query.addCriteria(Criteria.where("approved").is(approved));
+        query.addCriteria(Criteria.where("approved").is(true));
 
-        // Get the total number of approved testimonials
         long count = mongoTemplate.count(query, Testimonial.class);
-        if (count < 1) {
-            throw new Exception();
+        List<Testimonial> randomTestimonials;
+
+        try{
+        if (count < 3) {
+            throw new Exception("There are less then 3 approved testimonials");
         }
 
-        // Generate three random numbers to select three testimonials
-        if (count > 3) {
-            List<Integer> randomNumbers = new ArrayList<>();
-            Random rand = new Random();
-            while (randomNumbers.size() < 3) {
-                int randomNum = rand.nextInt((int) count);
-                if (!randomNumbers.contains(randomNum)) {
-                    randomNumbers.add(randomNum);
-                }
-            }
+                randomTestimonials = mongoTemplate.aggregate(
+                Aggregation.newAggregation(
+                        Aggregation.match(Criteria.where("approved").is(true)),
+                        Aggregation.sample(3)),
+                "testimonials", Testimonial.class).getMappedResults();
 
-
-
-        // Create a query to find the three random approved testimonials
-        Query queryRandom = new Query();
-        queryRandom.addCriteria(Criteria.where("approved").is(approved));
-        queryRandom.with(Sort.by(Sort.Direction.ASC, "_id"));
-        queryRandom.skip(randomNumbers.get(0));
-        queryRandom.limit(3);
-
-
-        // Return the three random approved testimonials
-        return mongoTemplate.find(queryRandom, Testimonial.class);
+    } catch (Exception e) {
+            randomTestimonials = mongoTemplate.find(query, Testimonial.class);
     }
-     return mongoTemplate.find(query, Testimonial.class);
+
+        return randomTestimonials;
     }
 
 
