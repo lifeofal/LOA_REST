@@ -18,7 +18,8 @@ public class Testimonial extends AbstractObject {
 //    @Id
 //    private ObjectId id;
 //    private Integer testId;
-    private String user;
+    private User user;
     private String text;
-    private List<String> links;
+//    private List<String> links;
+    private Boolean approved;
 }
